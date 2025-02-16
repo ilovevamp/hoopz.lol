@@ -1,0 +1,27 @@
+loadstring([[
+    if settings.Aimbot.Arc == "High" then
+        print("Aimbot arc is set to High")
+    else
+        print("Aimbot arc is not High")
+    end
+
+    if settings.Aimbot.Type == "OnJump" then
+        print("Aimbot activates on jump")
+    end
+
+    if settings.Exploit.Reach.Enabled then
+        print("Reach exploit is enabled with range:", settings.Exploit.Reach.Range)
+    else
+        print("Reach exploit is disabled")
+    end
+
+    if settings.Exploit.Magnet.Enabled then
+        print("Magnet exploit is enabled with range:", settings.Exploit.Magnet.Range)
+    end
+
+    if settings.Exploit.NoOutOfBounds.Enabled then
+        print("NoOutOfBounds is enabled")
+    end
+
+    print("WalkSpeed is set to:", settings.Velocity.WalkSpeed.Value)
+]])()
