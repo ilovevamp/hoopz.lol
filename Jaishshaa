@@ -1,27 +1,98 @@
-loadstring([[
-    if settings.Aimbot.Arc == "High" then
-        print("Aimbot arc is set to High")
-    else
-        print("Aimbot arc is not High")
+local function Camlock()
+    local Players = game:GetService("Players")
+    local Workspace = game:GetService("Workspace")
+    local Player = Players.LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local Camera = Workspace.CurrentCamera
+    local Humanoid = Character:WaitForChild("Humanoid")
+
+    local CamlockEnabled = true  
+
+    local function IsHoldingBasketball()
+        local Basketball = Character:FindFirstChild("Basketball")
+        return Basketball and Basketball:FindFirstChild("Ball")
     end
 
-    if settings.Aimbot.Type == "OnJump" then
-        print("Aimbot activates on jump")
+    local function GetGoal()
+        local Distance, Goal = math.huge, nil
+        local CharacterPosition = Character.PrimaryPart.Position  
+
+        local function CheckHoops(container)
+            if not container then return end
+            for _, court in ipairs(container:GetChildren()) do
+                for _, Obj in ipairs(court:GetDescendants()) do
+                    if Obj.Name == "Swish" and Obj.Parent:FindFirstChildOfClass("TouchTransmitter") then
+                        local HoopPosition = Obj.Parent.Position
+                        local Magnitude = (CharacterPosition - HoopPosition).Magnitude
+                        if Magnitude < Distance then
+                            Distance = Magnitude
+                            Goal = Obj.Parent
+                        end
+                    end
+                end
+            end
+        end
+
+        CheckHoops(Workspace:FindFirstChild("Courts"))
+        CheckHoops(Workspace:FindFirstChild("PracticeArea"))
+
+        return Goal, Distance
     end
 
-    if settings.Exploit.Reach.Enabled then
-        print("Reach exploit is enabled with range:", settings.Exploit.Reach.Range)
-    else
-        print("Reach exploit is disabled")
+    local function LowArc(dist)
+        if dist >= 59 and dist <= 61 then return -17
+        elseif dist >= 62 and dist <= 63 then return -16
+        elseif dist >= 64 and dist <= 65 then return -13
+        elseif dist >= 66 and dist <= 67 then return -11
+        elseif dist >= 68 and dist <= 69 then return -8
+        elseif dist >= 70 and dist <= 71 then return -5
+        elseif dist == 72 then return -2
+        else return 0
+        end
     end
 
-    if settings.Exploit.Magnet.Enabled then
-        print("Magnet exploit is enabled with range:", settings.Exploit.Magnet.Range)
+    local function HighArc(dist)
+        if dist >= 59 and dist <= 62 then return 20
+        elseif dist >= 63 and dist <= 65 then return 18
+        elseif dist >= 66 and dist <= 67 then return 15
+        elseif dist >= 68 and dist <= 69 then return 13
+        elseif dist >= 70 and dist <= 71 then return 10
+        else return 8
+        end
     end
 
-    if settings.Exploit.NoOutOfBounds.Enabled then
-        print("NoOutOfBounds is enabled")
+    local function AdjustCameraForJump()
+        if not CamlockEnabled or not IsHoldingBasketball() then return end
+        
+        local Goal, Distance = GetGoal()
+        if Goal then
+            local SideOffset = math.abs(Character.PrimaryPart.Position.X - Goal.Position.X) * 0.2
+            local ArcAdjustment = HighArc(math.floor(Distance))
+            if ArcAdjustment == 0 then
+                ArcAdjustment = LowArc(math.floor(Distance))
+            end
+            
+            local BasketPosition = Goal.Position + Vector3.new(0, ArcAdjustment, 0)
+            local OldCFrame = Camera.CFrame
+            Player.DevEnableMouseLock = false
+            Camera.CFrame = CFrame.new(Player.Character.Head.Position, BasketPosition)
+            firesignal(Player.PlayerGui.Button.MouseButton1Click)
+            Camera.CFrame = OldCFrame
+            Player.DevEnableMouseLock = true
+        end
     end
 
-    print("WalkSpeed is set to:", settings.Velocity.WalkSpeed.Value)
-]])()
+    local function ResetCamera()
+        Camera.CameraType = Enum.CameraType.Custom
+    end
+
+    Humanoid.StateChanged:Connect(function(_, NewState)
+        if CamlockEnabled and NewState == Enum.HumanoidStateType.Jumping then
+            AdjustCameraForJump()
+        elseif NewState == Enum.HumanoidStateType.Landed then
+            ResetCamera()
+        end
+    end)
+end
+
+Camlock()
