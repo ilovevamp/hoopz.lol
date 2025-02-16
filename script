@@ -1,0 +1,32 @@
+getgenv().settings = {
+    Aimbot = {
+        Arc = "High",
+        Type = "OnJump",
+        Keybind = Enum.KeyCode.X,
+        Indicator = false,
+    },
+
+    Exploit = {
+        Reach = {
+            Enabled = false,
+            Keybind = Enum.KeyCode.R,
+            Range = 0,
+        },
+
+        Magnet = {
+            Enabled = false,
+            Keybind = Enum.KeyCode.M,
+            Range = 0,
+        },
+
+        NoOutOfBounds = {
+            Enabled = true,
+        },
+    },
+
+    Velocity = {
+        WalkSpeed = {
+            Value = 16,
+        },
+    }
+}
